@@ -1,0 +1,19 @@
+# Build artifacts
+*.o
+build/
+*.deb
+
+# Executables and symlinks
+capslock-status
+capslock-status-gui
+capslock-indicator
+capslock-indicator-gui
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Temporary & system files
+*.log
+core
+.DS_Store

@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-deb:
+    name: Build Debian Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libcairo2-dev dpkg-dev build-essential
+
+      - name: Compile and run test suite
+        run: |
+          make clean
+          make all strip
+          # Test compilation and CLI features
+          ./capslock-status --version
+
+      - name: Build .deb package
+        run: |
+          make deb
+
+      - name: Calculate SHA256 checksums
+        run: |
+          sha256sum capslock-status_*.deb > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            capslock-status_*.deb
+            SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false

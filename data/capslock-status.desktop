@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CapsLock Status
+Comment=Status de Caps Lock, Num Lock e Scroll Lock
+Exec=capslock-status -g
+Icon=capslock-status
+Terminal=false
+Categories=Utility;System;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

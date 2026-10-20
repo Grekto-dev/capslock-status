@@ -1,0 +1,53 @@
+# ====================================================================
+# CapsLock Indicator - Configuration File (Linux Port)
+# Exact 1:1 replica of Jonas Kohl's CapsLock Indicator
+# ====================================================================
+
+[icons]
+# Show icons for...
+num_lock = true
+caps_lock = true
+scroll_lock = true
+show_no_icons = false
+
+[notifications]
+# Show notification when... changed
+num_lock = true
+caps_lock = true
+scroll_lock = true
+show_no_notification = false
+
+[general]
+start_on_logon = true
+hide_on_startup = true
+language = en-GB
+
+[overlay]
+# Position: top-left, top-center, top-right, center, bottom-left, bottom-center, bottom-right
+position = bottom-right
+margin_x = 24
+margin_y = 52
+duration_ms = 1200
+border_width = 2
+sticky = false
+dismiss_on_click = true
+
+[colours]
+# Exact colors matching Windows original cli_preview.png
+background = #424242
+border_activated = #4DB434
+border_deactivated = #B4344D
+text = #FFFFFF
+
+[strings]
+text_caps_on = Caps lock is on
+text_caps_off = Caps lock is off
+text_num_on = Num lock is on
+text_num_off = Num lock is off
+text_scroll_on = Scroll lock is on
+text_scroll_off = Scroll lock is off
+
+[sound]
+enable_sound = false
+sound_on_cmd = 
+sound_off_cmd = 

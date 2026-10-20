@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CapsLock Indicator
+Comment=CapsLock, NumLock and ScrollLock Indicator (Jonas Kohl Linux Port)
+Exec=capslock-indicator -g
+Icon=capslock-indicator
+Terminal=false
+Categories=Utility;System;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
