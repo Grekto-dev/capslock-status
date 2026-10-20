@@ -1,78 +1,140 @@
-# CapsLock Status v1.0.0 (Port Nativo e Ultra-Leve para Linux)
+# CapsLock Status
 
-O **CapsLock Status** é um utilitário nativo para Linux desenvolvido em C99 para exibir o estado das teclas **Caps Lock**, **Num Lock** e **Scroll Lock**, projetado para consumo irrisório de recursos (CPU 0.00%, ~2.9 MB de RAM) e compatibilidade total até mesmo com hardware modesto e antigo.
+[![Release](https://img.shields.io/github/v/release/Grekto-dev/capslock-status?color=2EA44F&label=Release)](https://github.com/Grekto-dev/capslock-status/releases)
+[![Build & Release](https://github.com/Grekto-dev/capslock-status/actions/workflows/release.yml/badge.svg)](https://github.com/Grekto-dev/capslock-status/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Baseado no projeto original [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) de Jonas Kohl.
-
----
-
-## ✨ Novidades e Recursos da Versão 1.0.0
-
-- 🎨 **Ícone Inédito em Vetor SVG**: Desenvolvido sob medida no estilo moderno do Linux Mint, representando a tecla de bloqueio com LED de status verde esmeralda (`data/capslock-status.svg`).
-- 🟢 **Design Moderno Linux Mint (2026)**:
-  - Janela de configurações com cartões escuros (`#22262C`), destaques em Verde Mint (`#2EA44F`) e tipografia moderna.
-  - Abas limpas (*Geral*, *Avisos em Tela*, *Opções Avançadas*).
-  - Remoção total de avisos de copyright antigos e verificadores de atualização desnecessários.
-- 🎬 **Animação Fiel de Fade Out**:
-  - Medida e replicada diretamente do algoritmo original em C#: o aviso em tela permanece 50% do tempo em opacidade total (100% visível) e, nos 50% finais, realiza uma transição suave e gradual de fade out via `_NET_WM_WINDOW_OPACITY` a 50 fps.
-- 📐 **Menu de Contexto do Tray Modernizado**:
-  - Menu escuro elegante na bandeja do sistema com cantos limpos, divisória sutil e barra de destaque Mint Green / Vermelho no hover ao passar o cursor sobre **Configurações** ou **Sair**.
-- 🛡️ **Bandeja Segura (Zero Crashes)**:
-  - Encaixe nativo na bandeja via protocolo XEmbed estritamente seguro, sem criação de janelas soltas e sem risco de travamento do Cinnamon / Muffin.
+A native, ultra-lightweight Linux port of [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) by Jonas Kohl. Written in pure C99 for negligible resource usage (0.00% idle CPU, ~2.9 MB RAM), designed to provide lock key status notifications with maximum responsiveness, even on modest hardware.
 
 ---
 
-## ⚡ Comparativo de Performance
+## ✨ Features
 
-| Métrica | CapsLock Status (C99) | Apps em Python / Electron / Web |
+- **Smooth On-Screen Display (OSD)**:
+  - Exact Windows 10/11 visual replica: `#424242` background, active/inactive colored borders (`#4DB434` / `#B4344D`), and crisp TrueType typography rendered via Cairo subpixel anti-aliasing.
+  - Faithful fade-out animation matching the original Windows timing: holds 100% opaque for the first half of the duration, then smoothly fades out at 50 fps.
+  - Zero input delay: instant appearance on key presses without compositor lag.
+- **System Tray Icons**:
+  - Independent status indicators for **Num Lock** `[N]`, **Caps Lock** `[C]`, and **Scroll Lock** `[S]`.
+  - Smart Tray mode: option to only show icons when keys are actively turned on.
+  - Safe XEmbed docking: reliable panel embedding that prevents desktop environment crashes.
+- **Modern Settings Interface**:
+  - Clean Linux Mint-styled configuration window with dark cards, accent colors, and responsive tabs.
+  - Instant live retranslation across English, Portuguese, German, Spanish, and French.
+  - Customizable display duration, screen position (9 positions), persistent overlays, and alert sounds.
+- **Lightweight Debian Package (`.deb`)**:
+  - Fully packaged with vector SVG icons, `.desktop` launcher, and system-wide binaries.
+
+---
+
+## ⚡ Performance Comparison
+
+| Metric | CapsLock Status (C99) | Typical Python / Web / Electron Apps |
 | :--- | :--- | :--- |
-| **Uso de CPU Ocioso** | **0.00%** (bloqueio puro no socket do kernel) | 0.5% – 2.0% |
-| **Memória RAM Daemon (RSS)** | **~2.9 MB** | 45 MB – 180 MB |
-| **Tamanho do Executável** | **47 KB** (C99 com `strip`) | 50 MB – 200 MB |
-| **Dependências em Execução** | **Apenas `libX11`** | Runtimes e navegadores pesados |
+| **Idle CPU Usage** | **0.00%** (kernel socket blocking) | 0.5% – 2.0% |
+| **RAM Footprint (RSS)** | **~2.9 MB** | 45 MB – 180 MB |
+| **Stripped Binary Size** | **~50 KB** | 50 MB – 200 MB |
+| **Runtime Dependencies** | **`libX11`, `libcairo`** | Heavy runtimes and browser engines |
 
 ---
 
-## 🛠️ Compilação e Instalação
+## 📥 Installation
 
-Para compilar e otimizar:
+### Option 1: Install Debian Package (`.deb`)
+
+Download the latest `.deb` package from the [Releases page](https://github.com/Grekto-dev/capslock-status/releases):
+
 ```bash
-make clean && make strip
+# Install the downloaded package
+sudo dpkg -i capslock-status_1.0.0_amd64.deb
+sudo apt-get install -f
 ```
 
-Para instalar no sistema (`/usr/local/bin`):
+### Option 2: Build from Source
+
+#### 1. Install Build Dependencies
+On Ubuntu / Debian / Linux Mint:
 ```bash
+sudo apt-get update
+sudo apt-get install -y build-essential libx11-dev libcairo2-dev python3 python3-gi gir1.2-gtk-3.0
+```
+
+#### 2. Compile and Install
+```bash
+git clone https://github.com/Grekto-dev/capslock-status.git
+cd capslock-status
+make clean && make strip
 sudo make install
 ```
-*(Também cria atalhos de compatibilidade para `capslock-indicator`)*.
+
+*(Creates system binaries and compatibility aliases for `capslock-indicator`)*.
+
+To build a `.deb` package locally:
+```bash
+make deb
+```
 
 ---
 
-## 🚀 Como Usar
+## 🚀 Usage
 
-### 1. Iniciar o daemon com os ícones na bandeja:
+### Start Daemon with Tray Icons
 ```bash
 capslock-status -d -t
 ```
 
-### 2. Abrir a Janela de Configurações (Interface Gráfica):
+### Open Settings GUI
 ```bash
 capslock-status -g
-# ou diretamente:
+# or directly:
 capslock-status-gui
 ```
-*(Ou basta dar um clique com o botão esquerdo no ícone da bandeja!)*
+*(You can also left-click any tray icon or right-click to open the context menu and choose **Settings**)*.
 
-### 3. Testar a Animação do Aviso Visual na Tela:
+### Test On-Screen Display (OSD)
 ```bash
 capslock-status --test
 ```
 
-### 4. Configurar Inicialização Automática com a Sessão:
+### Enable Autostart on Login
 ```bash
 capslock-status --install-autostart
 ```
 
 ---
 
-<small>Port para Linux baseado no projeto original CapsLockIndicator de Jonas Kohl.</small>
+## ⌨️ CLI Reference
+
+```text
+Usage: capslock-status [OPTIONS]
+
+Main Options:
+  -d, --daemon             Run in background (daemon mode)
+  -g, --gui                Open the Settings graphical interface
+  -t, --tray               Enable system tray icons [N] [C] [S]
+  -s, --status             Print current lock key states (Caps/Num/Scroll) and exit
+      --json               Format --status output as JSON
+      --test               Display test OSD popup and exit
+      --toggle KEY         Toggle key state (caps, num, scroll) and exit
+
+OSD Options:
+      --no-osd             Disable on-screen display notifications
+      --position POS       Position: bottom-right, bottom-center, top-right, center, etc.
+      --duration MS        Notification display time in milliseconds (default: 1200)
+      --sticky             Keep notification visible while key is active
+
+Autostart & Configuration:
+      --install-autostart   Register automatic startup on user login
+      --uninstall-autostart Remove automatic startup entry
+  -c, --config PATH        Specify custom config.ini path
+  -v, --version            Display version information
+  -h, --help               Display help message
+```
+
+---
+
+## 📄 License & Acknowledgments
+
+This project is licensed under the [MIT License](LICENSE).
+
+Linux port based on the original [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) created by [Jonas Kohl](https://github.com/jonaskohl).
