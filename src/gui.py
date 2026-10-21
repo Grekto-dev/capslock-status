@@ -11,9 +11,15 @@ import configparser
 import subprocess
 import signal
 
+# Ensure the GUI process never exits when SIGHUP is sent
+try:
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+except Exception:
+    pass
+
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Gio
 
 CONFIG_DIR = os.path.expanduser("~/.config/capslock-status")
 LEGACY_CONFIG_DIR = os.path.expanduser("~/.config/capslock-indicator")
@@ -413,8 +419,12 @@ window, .background {
 """
 
 class CapsLockSettingsWindow(Gtk.Window):
-    def __init__(self):
-        super().__init__(title="CapsLock Status")
+    def __init__(self, app=None):
+        if app:
+            super().__init__(title="CapsLock Status", application=app)
+        else:
+            super().__init__(title="CapsLock Status")
+        self.app = app
         self.set_default_size(630, 440)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -465,12 +475,22 @@ class CapsLockSettingsWindow(Gtk.Window):
 
         # Footer
         footer = self.create_footer()
-        main_vbox.pack_end(footer, False, False, 0)
-
         # Initialize labels for current language
         self.retranslate_ui(self.curr_lang)
 
-        self.connect("destroy", Gtk.main_quit)
+        self.connect("delete-event", self.on_delete_event)
+        self.connect("destroy", self.on_destroy)
+
+    def on_delete_event(self, widget, event):
+        if self.app:
+            self.app.win = None
+        return False
+
+    def on_destroy(self, widget):
+        if self.app:
+            self.app.win = None
+        else:
+            Gtk.main_quit()
 
     def load_config(self):
         if not os.path.exists(self.config_path):
@@ -482,9 +502,26 @@ class CapsLockSettingsWindow(Gtk.Window):
         os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
         with open(self.config_path, "w") as f:
             self.config.write(f)
-        # Send SIGHUP to reload daemon
-        subprocess.run(["killall", "-HUP", "capslock-status"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.run(["killall", "-HUP", "capslock-indicator"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Send SIGHUP strictly to the background daemon (never to GUI processes)
+        my_pid = os.getpid()
+        for proc_name in ["capslock-status", "capslock-indicator"]:
+            try:
+                out = subprocess.check_output(["pgrep", "-f", proc_name], stderr=subprocess.DEVNULL)
+                for pid_str in out.decode().split():
+                    pid = int(pid_str)
+                    if pid == my_pid:
+                        continue
+                    try:
+                        with open(f"/proc/{pid}/cmdline", "rb") as cf:
+                            cmdline = cf.read().decode(errors="ignore")
+                        if "-gui" in cmdline or "python" in cmdline:
+                            continue
+                        os.kill(pid, signal.SIGHUP)
+                    except OSError:
+                        pass
+            except Exception:
+                pass
 
     def create_general_tab(self):
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -889,14 +926,17 @@ class CapsLockSettingsWindow(Gtk.Window):
             self.save_and_notify()
 
     def hide_window(self):
-        self.hide()
-        Gtk.main_quit()
+        self.destroy()
 
     def exit_app(self):
         # Stop background daemon
         subprocess.run(["killall", "capslock-status"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.run(["killall", "capslock-indicator"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        Gtk.main_quit()
+        self.destroy()
+        if self.app:
+            self.app.quit()
+        else:
+            Gtk.main_quit()
 
 
 def show_tray_context_menu(target_x=None, target_y=None):
@@ -1006,6 +1046,20 @@ def show_tray_context_menu(target_x=None, target_y=None):
     Gtk.main()
 
 
+class CapsLockApp(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="org.grekto.capslock-status.settings",
+                         flags=Gio.ApplicationFlags.FLAGS_NONE)
+        self.win = None
+
+    def do_activate(self):
+        if not self.win:
+            self.win = CapsLockSettingsWindow(app=self)
+            self.win.show_all()
+        else:
+            self.win.deiconify()
+            self.win.present()
+
 def main():
     if "--menu" in sys.argv:
         idx = sys.argv.index("--menu")
@@ -1026,9 +1080,8 @@ def main():
         if res2.returncode != 0:
             subprocess.Popen([get_daemon_bin(), "-d", "-t"])
 
-    win = CapsLockSettingsWindow()
-    win.show_all()
-    Gtk.main()
+    app = CapsLockApp()
+    app.run(sys.argv)
 
 if __name__ == "__main__":
     main()

@@ -168,7 +168,7 @@ static bool install_autostart(void) {
     fprintf(f, "Type=Application\n");
     fprintf(f, "Name=CapsLock Status\n");
     fprintf(f, "Comment=Status de Caps Lock, Num Lock e Scroll Lock\n");
-    fprintf(f, "Exec=%s -d -t\n", exe_path);
+    fprintf(f, "Exec=%s -d\n", exe_path);
     fprintf(f, "Icon=capslock-status\n");
     fprintf(f, "Terminal=false\n");
     fprintf(f, "Categories=Utility;\n");
@@ -353,9 +353,6 @@ int main(int argc, char **argv) {
 
     // Apply CLI overrides
     if (opt_tray == 1) {
-        config.icon_num = true;
-        config.icon_caps = true;
-        config.icon_scroll = true;
         config.show_no_icons = false;
     }
     if (opt_osd != -1) config.show_osd = (opt_osd == 1);
@@ -409,12 +406,9 @@ int main(int argc, char **argv) {
 
     TrayContext tray;
     bool tray_ready = false;
-    bool want_icons = !config.show_no_icons && (config.icon_num || config.icon_caps || config.icon_scroll);
-    if (want_icons) {
-        tray_ready = tray_init(&tray, display, app.screen, &config);
-        if (tray_ready) {
-            tray_update(&tray, &config, &app);
-        }
+    tray_ready = tray_init(&tray, display, app.screen, &config);
+    if (tray_ready) {
+        tray_update(&tray, &config, &app);
     }
 
     bool prev_state[KEY_COUNT];
@@ -432,14 +426,8 @@ int main(int argc, char **argv) {
                 osd_destroy(&osd);
                 osd_ready = osd_init(&osd, display, app.screen, &config);
             }
-            want_icons = !config.show_no_icons && (config.icon_num || config.icon_caps || config.icon_scroll);
             if (tray_ready) {
-                tray_destroy(&tray);
-                tray_ready = false;
-            }
-            if (want_icons) {
-                tray_ready = tray_init(&tray, display, app.screen, &config);
-                if (tray_ready) tray_update(&tray, &config, &app);
+                tray_update(&tray, &config, &app);
             }
         }
 
@@ -494,6 +482,16 @@ int main(int argc, char **argv) {
                 osd_handle_event(&osd, &config, &ev);
             }
             if (tray_ready) {
+                tray_iterate(&tray);
+                if (tray.action_open_gui) {
+                    tray.action_open_gui = false;
+                    launch_gui();
+                }
+                if (tray.action_show_menu) {
+                    tray.action_show_menu = false;
+                    launch_menu(tray.action_menu_x, tray.action_menu_y);
+                }
+
                 bool open_gui = false;
                 bool show_menu = false;
                 int menu_x = 0, menu_y = 0;
@@ -521,12 +519,30 @@ int main(int argc, char **argv) {
             }
         }
 
+        if (tray_ready && tray.has_xapp) {
+            if (timeout_ms < 0 || timeout_ms > 50) {
+                timeout_ms = 50;
+            }
+        }
+
         struct pollfd pfd;
         pfd.fd = x11_fd;
         pfd.events = POLLIN;
         pfd.revents = 0;
 
         poll(&pfd, 1, timeout_ms);
+
+        if (tray_ready) {
+            tray_iterate(&tray);
+            if (tray.action_open_gui) {
+                tray.action_open_gui = false;
+                launch_gui();
+            }
+            if (tray.action_show_menu) {
+                tray.action_show_menu = false;
+                launch_menu(tray.action_menu_x, tray.action_menu_y);
+            }
+        }
 
         if (osd_ready && osd_is_visible(&osd)) {
             osd_update_animation(&osd, &config);

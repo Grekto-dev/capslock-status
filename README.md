@@ -4,7 +4,14 @@
 [![Build & Release](https://github.com/Grekto-dev/capslock-status/actions/workflows/release.yml/badge.svg)](https://github.com/Grekto-dev/capslock-status/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A native, ultra-lightweight Linux port of [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) by Jonas Kohl. Written in pure C99 for negligible resource usage (0.00% idle CPU, ~2.9 MB RAM), designed to provide lock key status notifications with maximum responsiveness, even on modest hardware.
+A native, ultra-lightweight Linux port of [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) by Jonas Kohl, tailored specifically for **Linux Mint**. Written in pure C99 for negligible resource usage (0.00% idle CPU, ~2.9 MB RAM), designed to provide lock key status notifications with maximum responsiveness, even on modest hardware.
+
+---
+
+## 💻 Supported Distribution & Compatibility
+
+- **Officially Supported**: **Linux Mint** (Cinnamon Edition).
+- **Disclaimer**: *CapsLock Status is tailored and tested specifically for Linux Mint. While it can be tested on other Linux distributions and desktop environments, it has not been tested on them and there is no guarantee that it will work properly.*
 
 ---
 
@@ -14,10 +21,14 @@ A native, ultra-lightweight Linux port of [CapsLockIndicator](https://github.com
   - Exact Windows 10/11 visual replica: `#424242` background, active/inactive colored borders (`#4DB434` / `#B4344D`), and crisp TrueType typography rendered via Cairo subpixel anti-aliasing.
   - Faithful fade-out animation matching the original Windows timing: holds 100% opaque for the first half of the duration, then smoothly fades out at 50 fps.
   - Zero input delay: instant appearance on key presses without compositor lag.
-- **System Tray Icons**:
+- **Native Linux Mint Tray Integration (`XAppStatusIcon`)**:
+  - Dedicated **CapsLock Status** application tray icon for quick access to settings and quitting the application.
   - Independent status indicators for **Num Lock** `[N]`, **Caps Lock** `[C]`, and **Scroll Lock** `[S]`.
-  - Smart Tray mode: option to only show icons when keys are actively turned on.
-  - Safe XEmbed docking: reliable panel embedding that prevents desktop environment crashes.
+  - Full support for dragging icons into the collapsible menu (`cinnamon-collapsible-tray`) or rearranging them on the panel.
+  - Native tooltips on every icon (`CapsLock Status`, `Num Lock`, `Caps Lock`, `Scroll Lock`).
+  - Single-instance settings: clicking any tray icon opens or restores focus to the settings dialog.
+  - Dynamic tray management: toggling icons in Settings immediately adds or removes them from the tray.
+  - Smart Tray mode: option to only show indicator icons when keys are actively turned on.
 - **Modern Settings Interface**:
   - Clean Linux Mint-styled configuration window with dark cards, accent colors, and responsive tabs.
   - Instant live retranslation across English, Portuguese, German, Spanish, and French.
@@ -53,7 +64,7 @@ sudo apt-get install -f
 ### Option 2: Build from Source
 
 #### 1. Install Build Dependencies
-On Ubuntu / Debian / Linux Mint:
+On Linux Mint:
 ```bash
 sudo apt-get update
 sudo apt-get install -y build-essential libx11-dev libcairo2-dev python3 python3-gi gir1.2-gtk-3.0

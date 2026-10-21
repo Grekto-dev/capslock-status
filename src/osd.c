@@ -137,41 +137,7 @@ bool osd_init(OSDContext *osd, Display *d, int screen, const AppConfig *config) 
     osd->gc = XCreateGC(d, osd->window, 0, NULL);
 
     // Initialize Cairo dynamically
-    osd->cairo.handle = dlopen("libcairo.so.2", RTLD_LAZY);
-    if (osd->cairo.handle) {
-        #define LOAD_SYM(name) osd->cairo.name = dlsym(osd->cairo.handle, "cairo_" #name)
-        LOAD_SYM(xlib_surface_create);
-        LOAD_SYM(create);
-        LOAD_SYM(select_font_face);
-        LOAD_SYM(set_font_size);
-        LOAD_SYM(set_antialias);
-        LOAD_SYM(text_extents);
-        LOAD_SYM(move_to);
-        LOAD_SYM(set_source_rgb);
-        LOAD_SYM(set_line_width);
-        LOAD_SYM(rectangle);
-        LOAD_SYM(fill);
-        LOAD_SYM(stroke);
-        LOAD_SYM(show_text);
-        LOAD_SYM(destroy);
-        LOAD_SYM(surface_destroy);
-        #undef LOAD_SYM
-
-        if (osd->cairo.xlib_surface_create && osd->cairo.create &&
-            osd->cairo.select_font_face && osd->cairo.set_font_size &&
-            osd->cairo.set_antialias && osd->cairo.text_extents &&
-            osd->cairo.move_to && osd->cairo.set_source_rgb &&
-            osd->cairo.set_line_width && osd->cairo.rectangle &&
-            osd->cairo.fill && osd->cairo.stroke &&
-            osd->cairo.show_text && osd->cairo.destroy &&
-            osd->cairo.surface_destroy) {
-            osd->cairo_available = true;
-        } else {
-            dlclose(osd->cairo.handle);
-            osd->cairo.handle = NULL;
-            osd->cairo_available = false;
-        }
-    }
+    osd->cairo_available = cairo_api_load(&osd->cairo);
 
     char **missing = NULL;
     int missing_count = 0;

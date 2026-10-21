@@ -2,37 +2,8 @@
 #define OSD_H
 
 #include "indicator.h"
+#include "cairo_api.h"
 #include <time.h>
-
-typedef void cairo_surface_t;
-typedef void cairo_t;
-typedef struct {
-    double x_bearing;
-    double y_bearing;
-    double width;
-    double height;
-    double x_advance;
-    double y_advance;
-} cairo_text_extents_t;
-
-typedef struct {
-    void *handle;
-    cairo_surface_t *(*xlib_surface_create)(Display *, Drawable, Visual *, int, int);
-    cairo_t *(*create)(cairo_surface_t *);
-    void (*select_font_face)(cairo_t *, const char *, int, int);
-    void (*set_font_size)(cairo_t *, double);
-    void (*set_antialias)(cairo_t *, int);
-    void (*text_extents)(cairo_t *, const char *, cairo_text_extents_t *);
-    void (*move_to)(cairo_t *, double, double);
-    void (*set_source_rgb)(cairo_t *, double, double, double);
-    void (*set_line_width)(cairo_t *, double);
-    void (*rectangle)(cairo_t *, double, double, double, double);
-    void (*fill)(cairo_t *);
-    void (*stroke)(cairo_t *);
-    void (*show_text)(cairo_t *, const char *);
-    void (*destroy)(cairo_t *);
-    void (*surface_destroy)(cairo_surface_t *);
-} CairoAPI;
 
 typedef struct {
     Display *display;
